@@ -1,0 +1,49 @@
+# =========================
+# PYTHON / DJANGO
+# =========================
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+.env
+venv/
+env/
+.venv/
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# =========================
+# ANGULAR
+# =========================
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.cache/
+
+# Angular logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# MYSQL BACKUPS (opcional)
+# =========================
+# Si NO quieres subir la base:
+# *.sql
+
+# Si SÍ quieres subirla, comenta lo anterior
+
+# =========================
+# SISTEMA
+# =========================
+.DS_Store
+Thumbs.db
