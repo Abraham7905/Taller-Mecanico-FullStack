@@ -1,0 +1,148 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h1>Motos</h1>
+      <p>Gestión de motos registradas</p>
+    </div>
+    <button class="btn-primary" *ngIf="puedeEditar" (click)="abrirModal()">+ Nueva Moto</button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <select [(ngModel)]="filtroPiloto" (change)="cargarMotos()">
+      <option [value]="0">Todos los pilotos</option>
+      <option *ngFor="let p of pilotos" [value]="p.id">{{ p.nombre }}</option>
+    </select>
+  </div>
+
+  <div class="table-card">
+    <div *ngIf="loading" class="empty">Cargando...</div>
+
+    <ng-container *ngIf="!loading">
+
+      <!-- Tabla desktop (oculta en ≤768px vía CSS) -->
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Modelo</th>
+            <th>Placa</th>
+            <th>Año</th>
+            <th>Piloto</th>
+            <th>Horas de Uso</th>
+            <th *ngIf="puedeEditar">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of motos">
+            <td>{{ m.id }}</td>
+            <td>{{ m.modelo }}</td>
+            <td>{{ m.placa ?? '—' }}</td>
+            <td>{{ m.anio }}</td>
+            <td>{{ getNombrePiloto(m.piloto) }}</td>
+            <td>{{ m.horas_uso }}h</td>
+            <td class="actions" *ngIf="puedeEditar">
+              <button class="btn-edit" (click)="abrirModal(m)">Editar</button>
+              <button class="btn-delete" (click)="eliminar(m.id)">Eliminar</button>
+            </td>
+          </tr>
+          <tr *ngIf="motos.length === 0">
+            <td colspan="7" class="empty">No hay motos registradas</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Cards móvil (ocultas en >768px vía CSS) -->
+      <div class="mobile-cards">
+        <div class="mobile-card" *ngFor="let m of motos">
+          <div class="mobile-card-header">
+            <span class="mobile-card-nombre">{{ m.modelo }}</span>
+            <span class="mobile-card-id">#{{ m.id }}</span>
+          </div>
+          <div class="mobile-card-body">
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">Placa</span>
+              <span class="mobile-card-value">{{ m.placa ?? '—' }}</span>
+            </div>
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">Año</span>
+              <span class="mobile-card-value">{{ m.anio }}</span>
+            </div>
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">Piloto</span>
+              <span class="mobile-card-value">{{ getNombrePiloto(m.piloto) }}</span>
+            </div>
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">Horas</span>
+              <span class="mobile-card-value">{{ m.horas_uso }}h</span>
+            </div>
+          </div>
+          <div class="mobile-card-actions" *ngIf="puedeEditar">
+            <button class="btn-edit" (click)="abrirModal(m)">Editar</button>
+            <button class="btn-delete" (click)="eliminar(m.id)">Eliminar</button>
+          </div>
+        </div>
+        <div class="empty" *ngIf="motos.length === 0">No hay motos registradas</div>
+      </div>
+
+    </ng-container>
+  </div>
+
+</div>
+
+<!-- Modal solo para admins y recepción -->
+<div class="modal-overlay" *ngIf="showModal && puedeEditar" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2>{{ editando ? 'Editar Moto' : 'Nueva Moto' }}</h2>
+      <button class="btn-close" (click)="cerrarModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Piloto *</label>
+        <select [(ngModel)]="form.piloto">
+          <option [value]="0" disabled>Selecciona un piloto</option>
+          <option *ngFor="let p of pilotos" [value]="p.id">{{ p.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Modelo *</label>
+          <input type="text" [(ngModel)]="form.modelo" placeholder="Ej: Honda CRF 250" />
+        </div>
+
+        <div class="form-group">
+          <label>Placa</label>
+          <input type="text" [(ngModel)]="form.placa" placeholder="Ej: ABC123" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Año *</label>
+          <input type="number" [(ngModel)]="form.anio" min="1990" [max]="2100" />
+        </div>
+
+        <div class="form-group">
+          <label>Horas de Uso</label>
+          <input type="number" [(ngModel)]="form.horas_uso" min="0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+      <button
+        class="btn-primary"
+        (click)="guardar()"
+        [disabled]="!form.piloto || !form.modelo">
+        {{ editando ? 'Guardar Cambios' : 'Crear Moto' }}
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,90 @@
+// motos.component.scss
+// Las clases base (.page, .table-card, .modal, etc.) viven en pilotos.scss
+// o en un archivo global. Este archivo solo gestiona lo exclusivo de motos.
+
+// ── Ocultar tabla / mostrar cards según breakpoint ───────────────
+table {
+  @media (max-width: 768px) { display: none; }
+}
+
+.mobile-cards {
+  display: none;
+
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.mobile-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .mobile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+
+    .mobile-card-nombre {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a2e;
+      flex: 1;
+    }
+
+    .mobile-card-id {
+      font-size: 12px;
+      color: #9ca3af;
+      background: #f3f4f6;
+      padding: 2px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+  }
+
+  .mobile-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .mobile-card-row {
+    display: flex;
+    gap: 6px;
+    font-size: 13px;
+    align-items: center;
+
+    .mobile-card-label {
+      color: #9ca3af;
+      font-weight: 600;
+      min-width: 72px;
+    }
+
+    .mobile-card-value { color: #374151; }
+  }
+
+  .mobile-card-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 4px;
+    border-top: 1px solid #f3f4f6;
+
+    .btn-edit, .btn-delete { flex: 1; text-align: center; }
+  }
+}
+
+// ── Ajuste del table-card en móvil ───────────────────────────────
+.table-card {
+  @media (max-width: 768px) {
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}

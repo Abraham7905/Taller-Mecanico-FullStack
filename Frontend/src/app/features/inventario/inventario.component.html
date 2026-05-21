@@ -1,0 +1,142 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h1>Inventario</h1>
+      <p>Gestión de items y repuestos</p>
+    </div>
+    <button class="btn-primary" (click)="abrirModal()">+ Nuevo Item</button>
+  </div>
+
+  <div class="filtros">
+    <select [(ngModel)]="filtroEstado" (change)="cargarItems()">
+      <option value="">Todos los items</option>
+      <option value="activo">Activos</option>
+      <option value="inactivo">Inactivos</option>
+    </select>
+  </div>
+
+  <div class="table-card">
+    <div *ngIf="loading" class="empty">Cargando...</div>
+
+    <ng-container *ngIf="!loading">
+
+      <!-- Tabla desktop -->
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of items">
+            <td>{{ item.id }}</td>
+            <td>{{ item.nombre }}</td>
+            <td>{{ item.descripcion ?? '—' }}</td>
+            <td>
+              <span class="badge" [class]="item.estado">{{ item.estado }}</span>
+            </td>
+            <td class="actions">
+              <button class="btn-edit" (click)="abrirModal(item)">Editar</button>
+              <button
+                class="btn-toggle"
+                [class.inactivo]="item.estado === 'activo'"
+                (click)="toggleEstado(item)">
+                {{ item.estado === 'activo' ? 'Desactivar' : 'Activar' }}
+              </button>
+              <button class="btn-delete" (click)="eliminar(item.id)">Eliminar</button>
+            </td>
+          </tr>
+          <tr *ngIf="items.length === 0">
+            <td colspan="5" class="empty">No hay items registrados</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Cards móvil -->
+      <div class="mobile-cards">
+        <div class="mobile-card" *ngFor="let item of items">
+          <div class="mobile-card-header">
+            <span class="mobile-card-nombre">{{ item.nombre }}</span>
+            <span class="mobile-card-id">#{{ item.id }}</span>
+          </div>
+
+          <div class="mobile-card-badges">
+            <span class="badge" [class]="item.estado">{{ item.estado }}</span>
+          </div>
+
+          <div class="mobile-card-body" *ngIf="item.descripcion">
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">Descripción</span>
+              <span class="mobile-card-value">{{ item.descripcion }}</span>
+            </div>
+          </div>
+
+          <div class="mobile-card-actions">
+            <button class="btn-edit" (click)="abrirModal(item)">Editar</button>
+            <button
+              class="btn-toggle"
+              [class.inactivo]="item.estado === 'activo'"
+              (click)="toggleEstado(item)">
+              {{ item.estado === 'activo' ? 'Desactivar' : 'Activar' }}
+            </button>
+            <button class="btn-delete" (click)="eliminar(item.id)">Eliminar</button>
+          </div>
+        </div>
+        <div class="empty" *ngIf="items.length === 0">No hay items registrados</div>
+      </div>
+
+    </ng-container>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2>{{ editando ? 'Editar Item' : 'Nuevo Item' }}</h2>
+      <button class="btn-close" (click)="cerrarModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input type="text" [(ngModel)]="form.nombre" placeholder="Nombre del item" />
+      </div>
+
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea
+          [(ngModel)]="form.descripcion"
+          placeholder="Descripción opcional"
+          rows="3">
+        </textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Estado</label>
+        <select [(ngModel)]="form.estado">
+          <option value="activo">Activo</option>
+          <option value="inactivo">Inactivo</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+      <button
+        class="btn-primary"
+        (click)="guardar()"
+        [disabled]="!form.nombre">
+        {{ editando ? 'Guardar Cambios' : 'Crear Item' }}
+      </button>
+    </div>
+
+  </div>
+</div>

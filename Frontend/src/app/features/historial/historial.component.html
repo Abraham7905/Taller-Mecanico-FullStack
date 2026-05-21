@@ -1,0 +1,181 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h1>Historial de Cambios</h1>
+      <p>Registro de cambios de estado en servicios</p>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <input
+      type="text"
+      class="busqueda"
+      [(ngModel)]="busqueda"
+      (input)="aplicarFiltros()"
+      placeholder="🔍 Buscar por piloto o moto..."
+    />
+
+    <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()">
+      <option value="">Todos los estados</option>
+      <option value="pendiente">Pendiente</option>
+      <option value="proceso">En Proceso</option>
+      <option value="terminado">Terminado</option>
+    </select>
+
+    <select [(ngModel)]="filtroTipo" (change)="aplicarFiltros()">
+      <option value="">Todos los tipos</option>
+      <option value="alistamiento">Alistamiento</option>
+      <option value="reparacion">Reparación</option>
+    </select>
+  </div>
+
+  <div class="table-card">
+    <div *ngIf="loading" class="empty">Cargando...</div>
+
+    <ng-container *ngIf="!loading">
+
+      <!-- TABLA DESKTOP -->
+      <table>
+        <thead>
+          <tr>
+            <th>Servicio</th>
+            <th>Piloto</th>
+            <th>Moto</th>
+            <th>Tipo</th>
+            <th>Estado Anterior</th>
+            <th>Estado Nuevo</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let h of historialFiltrado">
+            <td>#{{ h.servicioId }}</td>
+            <td>{{ h.piloto }}</td>
+            <td>{{ h.moto }}</td>
+
+            <td>
+              <span class="badge" [class]="h.tipo">
+                {{ h.tipo }}
+              </span>
+            </td>
+
+            <td>
+              <span
+                *ngIf="h.estadoAnterior !== '—'"
+                class="badge"
+                [class]="h.estadoAnterior">
+                {{ h.estadoAnterior }}
+              </span>
+
+              <span
+                *ngIf="h.estadoAnterior === '—'"
+                class="badge-nuevo">
+                Nuevo
+              </span>
+            </td>
+
+            <td>
+              <span class="badge" [class]="h.estadoNuevo">
+                {{ h.estadoNuevo }}
+              </span>
+            </td>
+
+            <td>{{ h.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+
+          <tr *ngIf="historialFiltrado.length === 0">
+            <td colspan="7" class="empty">
+              No hay registros
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- CARDS MOBILE -->
+      <div class="mobile-cards">
+
+        <div
+          class="mobile-card"
+          *ngFor="let h of historialFiltrado">
+
+          <div class="mobile-card-header">
+            <span class="mobile-card-nombre">
+              {{ h.piloto }}
+            </span>
+
+            <span class="mobile-card-id">
+              #{{ h.servicioId }}
+            </span>
+          </div>
+
+          <div class="mobile-card-badges">
+            <span class="badge" [class]="h.tipo">
+              {{ h.tipo }}
+            </span>
+
+            <span class="badge" [class]="h.estadoNuevo">
+              {{ h.estadoNuevo }}
+            </span>
+          </div>
+
+          <div class="mobile-card-body">
+
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">Moto</span>
+              <span class="mobile-card-value">
+                {{ h.moto }}
+              </span>
+            </div>
+
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">
+                Anterior
+              </span>
+
+              <span class="mobile-card-value">
+
+                <span
+                  *ngIf="h.estadoAnterior !== '—'"
+                  class="badge"
+                  [class]="h.estadoAnterior">
+                  {{ h.estadoAnterior }}
+                </span>
+
+                <span
+                  *ngIf="h.estadoAnterior === '—'"
+                  class="badge-nuevo">
+                  Nuevo
+                </span>
+
+              </span>
+            </div>
+
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">
+                Fecha
+              </span>
+
+              <span class="mobile-card-value">
+                {{ h.fecha | date:'dd/MM/yyyy HH:mm' }}
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          class="empty"
+          *ngIf="historialFiltrado.length === 0">
+          No hay registros
+        </div>
+
+      </div>
+
+    </ng-container>
+  </div>
+
+</div>

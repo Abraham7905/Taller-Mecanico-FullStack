@@ -1,0 +1,252 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h1>Servicios</h1>
+      <p>Gestión de alistamientos y reparaciones</p>
+    </div>
+    <button class="btn-primary" *ngIf="puedeEditar" (click)="abrirModal()">+ Nuevo Servicio</button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <select [(ngModel)]="filtroEstado" (change)="cargarServicios()">
+      <option value="">Todos los estados</option>
+      <option value="pendiente">Pendiente</option>
+      <option value="proceso">En Proceso</option>
+      <option value="terminado">Terminado</option>
+    </select>
+
+    <select [(ngModel)]="filtroTipo" (change)="cargarServicios()">
+      <option value="">Todos los tipos</option>
+      <option value="alistamiento">Alistamiento</option>
+      <option value="reparacion">Reparación</option>
+    </select>
+  </div>
+
+  <div class="table-card">
+    <div *ngIf="loading" class="empty">Cargando...</div>
+
+    <ng-container *ngIf="!loading">
+
+      <!-- Tabla desktop (oculta en ≤768px vía CSS) -->
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Piloto</th>
+            <th>Moto</th>
+            <th>Tipo</th>
+            <th>Horas</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th *ngIf="puedeEditar">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of servicios">
+            <td>{{ s.id }}</td>
+            <td>{{ getNombrePiloto(s.piloto) }}</td>
+            <td>{{ getNombreMoto(s.moto) }}</td>
+            <td>
+              <span class="badge" [class]="s.tipo">{{ s.tipo }}</span>
+            </td>
+            <td>{{ s.horas_servicio }}h</td>
+            <td>
+              <select
+                class="estado-select"
+                [class]="s.estado"
+                [ngModel]="s.estado"
+                (ngModelChange)="cambiarEstado(s.id, $event)">
+                <option value="pendiente">Pendiente</option>
+                <option value="proceso">En Proceso</option>
+                <option value="terminado">Terminado</option>
+              </select>
+            </td>
+            <td>{{ s.fecha_ingreso | date:'dd/MM/yyyy' }}</td>
+            <td class="actions" *ngIf="puedeEditar">
+              <button class="btn-edit" (click)="abrirModal(s)">Editar</button>
+              <button class="btn-delete" (click)="eliminar(s.id)">Eliminar</button>
+            </td>
+          </tr>
+          <tr *ngIf="servicios.length === 0">
+            <td colspan="8" class="empty">No hay servicios registrados</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Cards móvil (ocultas en >768px vía CSS) -->
+      <div class="mobile-cards">
+        <div class="mobile-card" *ngFor="let s of servicios">
+          <div class="mobile-card-header">
+            <span class="mobile-card-nombre">{{ getNombrePiloto(s.piloto) }}</span>
+            <span class="mobile-card-id">#{{ s.id }}</span>
+          </div>
+
+          <div class="mobile-card-badges">
+            <span class="badge" [class]="s.tipo">{{ s.tipo }}</span>
+          </div>
+
+          <div class="mobile-card-body">
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">Moto</span>
+              <span class="mobile-card-value">{{ getNombreMoto(s.moto) }}</span>
+            </div>
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">Horas</span>
+              <span class="mobile-card-value">{{ s.horas_servicio }}h</span>
+            </div>
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">Fecha</span>
+              <span class="mobile-card-value">{{ s.fecha_ingreso | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">Estado</span>
+              <!-- El select de estado sí queda disponible para todos los roles -->
+              <select
+                class="estado-select"
+                [class]="s.estado"
+                [ngModel]="s.estado"
+                (ngModelChange)="cambiarEstado(s.id, $event)">
+                <option value="pendiente">Pendiente</option>
+                <option value="proceso">En Proceso</option>
+                <option value="terminado">Terminado</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mobile-card-actions" *ngIf="puedeEditar">
+            <button class="btn-edit" (click)="abrirModal(s)">Editar</button>
+            <button class="btn-delete" (click)="eliminar(s.id)">Eliminar</button>
+          </div>
+        </div>
+        <div class="empty" *ngIf="servicios.length === 0">No hay servicios registrados</div>
+      </div>
+
+    </ng-container>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════ MODAL ══════════════════════════════ -->
+<div class="modal-overlay" *ngIf="showModal && puedeEditar" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2>{{ editando ? 'Editar Servicio' : 'Nuevo Servicio' }}</h2>
+      <button class="btn-close" (click)="cerrarModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="form-group">
+        <label>Piloto *</label>
+        <select [(ngModel)]="form.piloto" (change)="onPilotoChange()">
+          <option [value]="0" disabled>Selecciona un piloto</option>
+          <option *ngFor="let p of pilotos" [value]="p.id">{{ p.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Moto *</label>
+        <select [(ngModel)]="form.moto" [disabled]="!form.piloto">
+          <option [value]="0" disabled>Selecciona una moto</option>
+          <option *ngFor="let m of motosFiltradas" [value]="m.id">
+            {{ m.modelo }} ({{ m.anio }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo *</label>
+          <select [(ngModel)]="form.tipo" (change)="onTipoChange()">
+            <option value="alistamiento">Alistamiento</option>
+            <option value="reparacion">Reparación</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select [(ngModel)]="form.estado">
+            <option value="pendiente">Pendiente</option>
+            <option value="proceso">En Proceso</option>
+            <option value="terminado">Terminado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Horas de Servicio</label>
+        <input type="number" [(ngModel)]="form.horas_servicio" min="0" />
+      </div>
+
+      <div class="seccion-dinamica" *ngIf="form.tipo === 'reparacion'">
+        <div class="seccion-header">
+          <span class="seccion-titulo">
+            <span class="seccion-badge reparacion">Ítems de inventario</span>
+          </span>
+          <button class="btn-agregar" type="button" (click)="agregarItem()">+ Agregar ítem</button>
+        </div>
+
+        <div class="empty-dinamico" *ngIf="formItems.length === 0">
+          Sin ítems agregados — la reparación se guardará sin inventario.
+        </div>
+
+        <div class="filas-dinamicas">
+          <div class="fila-dinamica" *ngFor="let fi of formItems; let i = index">
+            <div class="fila-select">
+              <select [(ngModel)]="fi.item">
+                <option [value]="0" disabled>Selecciona un ítem</option>
+                <ng-container *ngFor="let item of itemsCatalogo">
+                  <option [value]="item.id" [disabled]="!itemDisponible(item.id, i)">
+                    {{ item.nombre }}
+                  </option>
+                </ng-container>
+              </select>
+            </div>
+            <div class="fila-cantidad">
+              <label class="cantidad-label">Cant.</label>
+              <input type="number" [(ngModel)]="fi.cantidad" min="1" class="input-cantidad" />
+            </div>
+            <button class="btn-quitar" type="button" (click)="quitarItem(i)" title="Quitar">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="seccion-dinamica" *ngIf="form.tipo === 'alistamiento'">
+        <div class="seccion-header">
+          <span class="seccion-titulo">
+            <span class="seccion-badge alistamiento">Extras del alistamiento</span>
+          </span>
+          <button class="btn-agregar" type="button" (click)="agregarExtra()">+ Agregar extra</button>
+        </div>
+
+        <div class="empty-dinamico" *ngIf="formExtras.length === 0">
+          Sin extras — puedes guardar el alistamiento sin agregar ninguno.
+        </div>
+
+        <div class="filas-dinamicas">
+          <div class="fila-extra" *ngFor="let fe of formExtras; let i = index">
+            <div class="extra-fields">
+              <input type="text" [(ngModel)]="fe.nombre" placeholder="Nombre del extra *" class="input-extra-nombre" />
+              <input type="text" [(ngModel)]="fe.descripcion" placeholder="Descripción (opcional)" class="input-extra-desc" />
+            </div>
+            <button class="btn-quitar" type="button" (click)="quitarExtra(i)" title="Quitar">✕</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+      <button
+        class="btn-primary"
+        (click)="guardar()"
+        [disabled]="!form.piloto || !form.moto">
+        {{ editando ? 'Guardar Cambios' : 'Crear Servicio' }}
+      </button>
+    </div>
+
+  </div>
+</div>

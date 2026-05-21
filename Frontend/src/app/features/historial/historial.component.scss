@@ -1,0 +1,165 @@
+.busqueda {
+  padding: 9px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #374151;
+  outline: none;
+  background: #ffffff;
+  flex: 2;
+  min-width: 200px;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: #e63946;
+  }
+
+  // Tablet
+  @media (max-width: 1024px) {
+    min-width: 180px;
+  }
+
+  // Mobile principal
+  @media (max-width: 768px) {
+    width: 100%;
+    min-width: unset;
+    flex: unset;
+  }
+
+  // Mobile pequeño
+  @media (max-width: 480px) {
+    width: 100%;
+    font-size: 16px;
+  }
+}
+
+.badge-nuevo {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f3f4f6;
+  color: #6b7280;
+  white-space: nowrap;
+
+  @media (max-width: 480px) {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+}
+
+/* ── Tabla desktop ───────────────────────── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  thead tr {
+    border-bottom: 2px solid #f3f4f6;
+  }
+
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    padding: 12px 14px;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: #f9fafb;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+
+/* ── Mobile cards ───────────────────────── */
+.mobile-cards {
+  display: none;
+
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.mobile-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-card-nombre {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a2e;
+  flex: 1;
+}
+
+.mobile-card-id {
+  font-size: 12px;
+  color: #9ca3af;
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.mobile-card-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mobile-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-card-row {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-size: 13px;
+}
+
+.mobile-card-label {
+  min-width: 70px;
+  color: #9ca3af;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.mobile-card-value {
+  color: #374151;
+  line-height: 1.4;
+}

@@ -1,0 +1,66 @@
+<!-- Botón hamburguesa (móvil) -->
+<button class="hamburger" (click)="toggleMenu()">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<!-- Overlay oscuro (móvil) -->
+<div class="overlay" [class.visible]="menuAbierto" (click)="cerrarMenu()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" [class.abierto]="menuAbierto">
+
+  <div class="sidebar-header">
+    <span class="sidebar-icon">🔧</span>
+    <div>
+      <h2>Taller</h2>
+      <p>Mecánico</p>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a routerLink="/dashboard"  routerLinkActive="activo" (click)="cerrarMenu()" class="nav-item">
+      <span class="nav-icono">📊</span>
+      <span class="nav-label">Dashboard</span>
+    </a>
+    <a routerLink="/pilotos" routerLinkActive="activo" (click)="cerrarMenu()" class="nav-item">
+      <span class="nav-icono">👤</span>
+      <span class="nav-label">Pilotos</span>
+    </a>
+    <a routerLink="/motos" routerLinkActive="activo" (click)="cerrarMenu()" class="nav-item">
+      <span class="nav-icono">🏍️</span>
+      <span class="nav-label">Motos</span>
+    </a>
+    <a routerLink="/servicios" routerLinkActive="activo" (click)="cerrarMenu()" class="nav-item">
+      <span class="nav-icono">🔧</span>
+      <span class="nav-label">Servicios</span>
+    </a>
+    <a routerLink="/inventario" routerLinkActive="activo" (click)="cerrarMenu()" class="nav-item">
+      <span class="nav-icono">📦</span>
+      <span class="nav-label">Inventario</span>
+    </a>
+    <a routerLink="/historial" routerLinkActive="activo" (click)="cerrarMenu()" class="nav-item">
+      <span class="nav-icono">📋</span>
+      <span class="nav-label">Historial</span>
+    </a>
+    <a routerLink="/usuarios" routerLinkActive="activo" (click)="cerrarMenu()" class="nav-item">
+      <span class="nav-icono">👥</span>
+      <span class="nav-label">Usuarios</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="usuario-info" *ngIf="usuario">
+      <span class="usuario-avatar">{{ usuario.username[0].toUpperCase() }}</span>
+      <div>
+        <p class="usuario-nombre">{{ usuario.username }}</p>
+        <p class="usuario-rol">{{ usuario.rol }}</p>
+      </div>
+    </div>
+    <button class="btn-logout" (click)="logout()">
+      🚪 Cerrar sesión
+    </button>
+  </div>
+
+</aside>

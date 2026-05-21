@@ -1,0 +1,342 @@
+<div class="dashboard">
+
+  <!-- ── Header ─────────────────────────────── -->
+  <div class="dash-header">
+    <div class="dash-header-left">
+      <div class="dash-icon">📊</div>
+      <div>
+        <h1>Panel Principal</h1>
+        <p>Vista general del taller y actividad reciente</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Buscador ───────────────────────────── -->
+  <div class="buscador-card">
+    <div class="buscador-wrap">
+      <span class="buscador-icono">🔍</span>
+      <input
+        type="text"
+        [(ngModel)]="textoBusqueda"
+        (keyup.enter)="buscar()"
+        (input)="!textoBusqueda && limpiarBusqueda()"
+        placeholder="Buscar piloto por nombre, cédula, placa, teléfono o correo..."
+        class="buscador-input"
+      />
+      <button class="btn-buscar" (click)="buscar()" [disabled]="buscando">
+        {{ buscando ? 'Buscando...' : 'Buscar' }}
+      </button>
+      <button class="btn-limpiar" *ngIf="textoBusqueda" (click)="limpiarBusqueda()">✕</button>
+    </div>
+
+    <!-- Sin resultados ← MODIFICADO -->
+    <div class="sin-resultados" *ngIf="sinResultados">
+      <span>⚠️ No se encontró ningún piloto con "<strong>{{ textoBusqueda }}</strong>".</span>
+      <button class="btn-accion primary" (click)="abrirModalPiloto()">+ Crear Piloto</button>
+    </div>
+
+    <!-- Resultado -->
+    <div class="resultado-busqueda" *ngIf="resultadoBusqueda">
+
+      <div class="resultado-piloto">
+        <div class="piloto-avatar">
+          {{ getIniciales(resultadoBusqueda.piloto.nombre) }}
+        </div>
+        <div class="piloto-datos">
+          <h3>{{ resultadoBusqueda.piloto.nombre }}</h3>
+          <div class="piloto-meta">
+            <span *ngIf="resultadoBusqueda.piloto.cc">🪪 {{ resultadoBusqueda.piloto.cc }}</span>
+            <span>📞 {{ resultadoBusqueda.piloto.telefono }}</span>
+            <span *ngIf="resultadoBusqueda.piloto.email">✉️ {{ resultadoBusqueda.piloto.email }}</span>
+          </div>
+        </div>
+        <div class="piloto-acciones">
+          <span class="piloto-servicios-total">{{ resultadoBusqueda.servicios.length }} servicios</span>
+          <button class="btn-accion" (click)="abrirModalMoto()">🏍️ Nueva Moto</button>
+          <button class="btn-accion primary" (click)="abrirModalServicio()">🔧 Nuevo Servicio</button>
+        </div>
+      </div>
+
+      <div class="resultado-servicios" *ngIf="resultadoBusqueda.servicios.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tipo</th>
+              <th>Estado</th>
+              <th>Horas</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of resultadoBusqueda.servicios">
+              <td>{{ s.id }}</td>
+              <td><span class="badge" [class]="s.tipo">{{ s.tipo }}</span></td>
+              <td><span class="badge" [class]="s.estado">{{ s.estado }}</span></td>
+              <td>{{ s.horas_servicio }}h</td>
+              <td>{{ s.fecha_ingreso | date:'dd/MM/yyyy' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="resultadoBusqueda.servicios.length === 0" class="empty">
+        Este piloto no tiene servicios registrados.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Estadísticas ───────────────────────── -->
+  <div class="stats-grid">
+    <div class="stat-card pendiente clickable" routerLink="/servicios" [queryParams]="{ estado: 'pendiente' }">
+      <div class="stat-info">
+        <span class="stat-label">Servicios Pendientes</span>
+        <span class="stat-value pendiente">{{ serviciosPendientes }}</span>
+      </div>
+      <div class="stat-img">🔩</div>
+    </div>
+
+    <div class="stat-card proceso clickable" routerLink="/servicios" [queryParams]="{ estado: 'proceso' }">
+      <div class="stat-info">
+        <span class="stat-label">Servicios en Proceso</span>
+        <span class="stat-value proceso">{{ serviciosEnProceso }}</span>
+      </div>
+      <div class="stat-img">🏍️</div>
+    </div>
+
+    <div class="stat-card terminado clickable" routerLink="/servicios" [queryParams]="{ estado: 'terminado' }">
+      <div class="stat-info">
+        <span class="stat-label">Servicios Terminados</span>
+        <span class="stat-value terminado">{{ serviciosTerminados }}</span>
+      </div>
+      <div class="stat-img">🏁</div>
+    </div>
+
+    <div class="stat-card pilotos clickable" routerLink="/pilotos">
+      <div class="stat-info">
+        <span class="stat-label">Pilotos Activos</span>
+        <span class="stat-value pilotos">{{ totalPilotos }}</span>
+      </div>
+      <div class="stat-img">👨‍🔧</div>
+    </div>
+  </div>
+
+  <!-- ── Contenido inferior ─────────────────── -->
+  <div class="bottom-grid">
+    <div class="card tendencia">
+      <div class="card-header">
+        <div>
+          <h2>Tendencia de servicios</h2>
+          <p>Servicios realizados en los últimos 7 días</p>
+        </div>
+        <span class="badge-total">📈 {{ serviciosTerminados }} total</span>
+      </div>
+      <div class="chart-area">
+        <div class="bar-chart">
+          <div *ngFor="let d of tendencia" class="bar-wrap">
+            <div class="bar" [style.height.%]="d.porcentaje"></div>
+            <span class="bar-label">{{ d.dia }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card actividad">
+      <div class="card-header">
+        <h2>Actividad reciente</h2>
+        <span class="badge-hoy">🕐 Hoy</span>
+      </div>
+      <div class="actividad-list">
+        <div class="actividad-item" *ngFor="let s of ultimosServicios">
+          <div class="actividad-avatar">{{ getIniciales(getNombrePiloto(s.piloto)) }}</div>
+          <div class="actividad-info">
+            <p class="actividad-nombre">{{ getNombrePiloto(s.piloto) }}</p>
+            <p class="actividad-tipo">{{ s.tipo | uppercase }} · {{ s.fecha_ingreso | date:'dd MMM yyyy' }}</p>
+            <span class="estado-badge" [ngClass]="getEstadoClase(s.estado)">{{ s.estado }}</span>
+          </div>
+          <span class="actividad-horas">{{ s.horas_servicio }}h</span>
+        </div>
+        <div *ngIf="ultimosServicios.length === 0" class="empty">
+          No hay actividad reciente
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Modal Nueva Moto ───────────────────── -->
+<div class="modal-overlay" *ngIf="showModalMoto" (click)="cerrarModalMoto()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2>Nueva Moto</h2>
+      <button class="btn-close" (click)="cerrarModalMoto()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Modelo *</label>
+          <input type="text" [(ngModel)]="formMoto.modelo" placeholder="Ej: Honda CRF 250" />
+        </div>
+        <div class="form-group">
+          <label>Placa</label>
+          <input type="text" [(ngModel)]="formMoto.placa" placeholder="Ej: ABC123" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Año *</label>
+          <input type="number" [(ngModel)]="formMoto.anio" min="1990" max="2100" />
+        </div>
+        <div class="form-group">
+          <label>Horas de Uso</label>
+          <input type="number" [(ngModel)]="formMoto.horas_uso" min="0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalMoto()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarMoto()" [disabled]="!formMoto.modelo">
+        Crear Moto
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Modal Nuevo Servicio ───────────────── -->
+<div class="modal-overlay" *ngIf="showModalServicio" (click)="cerrarModalServicio()">
+  <div class="modal modal-lg" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2>Nuevo Servicio</h2>
+      <button class="btn-close" (click)="cerrarModalServicio()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Moto *</label>
+        <select [(ngModel)]="formServicio.moto">
+          <option [value]="0" disabled>Selecciona una moto</option>
+          <option *ngFor="let m of motos" [value]="m.id">
+            {{ m.modelo }} ({{ m.anio }}) {{ m.placa ? '· ' + m.placa : '' }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo *</label>
+          <select [(ngModel)]="formServicio.tipo" (change)="onTipoServicioChange()">
+            <option value="alistamiento">Alistamiento</option>
+            <option value="reparacion">Reparación</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select [(ngModel)]="formServicio.estado">
+            <option value="pendiente">Pendiente</option>
+            <option value="proceso">En Proceso</option>
+            <option value="terminado">Terminado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Horas de Servicio</label>
+        <input type="number" [(ngModel)]="formServicio.horas_servicio" min="0" />
+      </div>
+
+      <div *ngIf="formServicio.tipo === 'reparacion'" class="items-section">
+        <label class="items-label">🔩 Items de Reparación</label>
+
+        <div class="items-selector">
+          <select #itemSelect>
+            <option value="">Selecciona un item</option>
+            <option *ngFor="let i of items" [value]="i.id">{{ i.nombre }}</option>
+          </select>
+          <button
+            class="btn-accion"
+            type="button"
+            (click)="agregarItem(+itemSelect.value); itemSelect.value = ''">
+            + Agregar
+          </button>
+        </div>
+
+        <div class="items-lista" *ngIf="itemsSeleccionados.length > 0">
+          <div class="item-row" *ngFor="let i of itemsSeleccionados">
+            <span class="item-nombre">{{ getNombreItem(i.item) }}</span>
+            <div class="item-cantidad">
+              <button type="button" (click)="i.cantidad > 1 ? i.cantidad = i.cantidad - 1 : null">−</button>
+              <span>{{ i.cantidad }}</span>
+              <button type="button" (click)="i.cantidad = i.cantidad + 1">+</button>
+            </div>
+            <button class="btn-quitar" type="button" (click)="quitarItem(i.item)">✕</button>
+          </div>
+        </div>
+
+        <div *ngIf="itemsSeleccionados.length === 0" class="items-empty">
+          No hay items agregados
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalServicio()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarServicio()" [disabled]="!formServicio.moto">
+        Crear Servicio
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Modal Nuevo Piloto ─────────────────── -->  <!-- ← AÑADIDO -->
+<div class="modal-overlay" *ngIf="showModalPiloto" (click)="cerrarModalPiloto()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2>Nuevo Piloto</h2>
+      <button class="btn-close" (click)="cerrarModalPiloto()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input type="text" [(ngModel)]="formPiloto.nombre" placeholder="Nombre completo" />
+      </div>
+
+      <div class="form-group">
+        <label>Cédula</label>
+        <input type="text" [(ngModel)]="formPiloto.cc" placeholder="Número de cédula" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Teléfono *</label>
+          <input type="text" [(ngModel)]="formPiloto.telefono" placeholder="Número de teléfono" />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="formPiloto.email" placeholder="correo@ejemplo.com" />
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalPiloto()">Cancelar</button>
+      <button
+        class="btn-primary"
+        (click)="guardarPiloto()"
+        [disabled]="!formPiloto.nombre || !formPiloto.telefono">
+        Crear Piloto
+      </button>
+    </div>
+
+  </div>
+</div>
