@@ -1,1 +1,1 @@
-web: gunicorn taller_mecanico.wsgi --log-file -
+web: gunicorn taller_mecanico.wsgi --bind 0.0.0.0:$PORT
