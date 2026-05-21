@@ -8,7 +8,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-=3=u4lu-u^p1o_hqh=vt7
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'backendtaller-mecanico-fullstack-production.up.railway.app',
+    'localhost',
+    '127.0.0.1'
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
